@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "Reset",
+  "version": "${version}",
+  "name": "Reset",
+  "description": "",
+  "authors": [
+    "cnlimiter"
+  ],
+  "contact": {
+    "repo": "https://github.com/cnlimiter/Reset"
+  },
+  "license": "AGPL-3.0",
+  "icon": "assets/Reset/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "cn.evole.mods.reset.Reset"
+    ]
+  },
+  "mixins": [
+    "Reset.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
