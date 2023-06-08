@@ -11,13 +11,13 @@ import java.util.regex.Pattern;
  * Description
  */
 
-public abstract class TaskMode {
+public abstract class Mode {
     protected final String name;
     protected final String setting;
 
     protected LocalTime localTime;
 
-    public TaskMode(String config) {
+    public Mode(String config) {
 
         if (config.contains(",")) {
             String[] split = config.split(",");
@@ -39,16 +39,16 @@ public abstract class TaskMode {
 
     public abstract LocalDateTime getExpiredTime();
 
-    public static TaskMode of(String config) {
+    public static Mode of(String config) {
 
-        if (config.startsWith("second")) return new Second(config);
-        if (config.startsWith("minute")) return new Minute(config);
-        if (config.startsWith("hour")) return new Hour(config);
-        if (config.startsWith("date")) return new Date(config);
-        if (config.startsWith("day")) return new Day(config);
-        if (config.startsWith("week")) return new Week(config);
-        if (config.startsWith("month")) return new Month(config);
-        if (config.startsWith("year")) return new Year(config);
+        if (config.startsWith("second")) return new Time.Second(config);
+        if (config.startsWith("minute")) return new Time.Minute(config);
+        if (config.startsWith("hour")) return new Time.Hour(config);
+        if (config.startsWith("date")) return new Time.Date(config);
+        if (config.startsWith("day")) return new Time.Day(config);
+        if (config.startsWith("week")) return new Time.Week(config);
+        if (config.startsWith("month")) return new Time.Month(config);
+        if (config.startsWith("year")) return new Time.Year(config);
 
         throw new IllegalArgumentException("时间设置配置错误, 请检查配置文件");
     }
