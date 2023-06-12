@@ -42,17 +42,6 @@ public class WorldManagerApi {
         RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
         worldHandle.delete();
     }
-    public ServerLevel world(String id) {
-        Fantasy fantasy = Fantasy.get(this.server);
-        RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
-        return worldHandle.asWorld();
-    }
-    public long worldSeed(String id) {
-        Fantasy fantasy = Fantasy.get(this.server);
-        RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
-        return worldHandle.asWorld().getSeed();
-    }
-
     public boolean resetWorld(String id, ResourceKey<DimensionType> dim, ChunkGenerator gen, Difficulty dif, long seed) {
         try {
             deleteWorld(id);

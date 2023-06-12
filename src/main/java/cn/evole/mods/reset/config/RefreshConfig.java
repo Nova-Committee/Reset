@@ -19,7 +19,7 @@
 @Setter
 public class RefreshConfig extends YmlConfig {
     public RefreshConfig(String folder) {
-        super(folder + "\\refresh.yml");
+        super(folder + "\\"+ " refresh.yml");
     }
 
 
@@ -33,4 +33,7 @@ public class RefreshConfig extends YmlConfig {
      public WorldRefresh get(String path){
          return Objects.requireNonNull(this.instance.get(path));
      }
+
+
+
 }

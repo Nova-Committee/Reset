@@ -2,14 +2,20 @@ package cn.evole.mods.reset.task;
 
 import cn.evole.mods.reset.Reset;
 import cn.evole.mods.reset.api.manager.WorldManagerApi;
-import cn.evole.mods.reset.config.model.WorldRefresh;
+import cn.evole.mods.reset.config.RefreshConfig;
 import cn.evole.mods.reset.util.Logger;
+import com.github.houbb.sandglass.api.api.IJobContext;
+import com.github.houbb.sandglass.api.api.ITrigger;
+import com.github.houbb.sandglass.core.api.job.AbstractJob;
+import com.github.houbb.sandglass.core.support.trigger.CronTrigger;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Author cnlimiter
@@ -18,43 +24,47 @@ import java.util.Random;
  * Description
  */
 
-public class RegenWorldTask extends ScheduleTask{
-    private final ServerLevel world;
+public class RegenWorldTask extends AbstractJob {
+    private final String name;
     private final WorldManagerApi manager;
+    private final RefreshConfig config;
+    private final ITrigger trigger;
+    private final MinecraftServer server;
 
-    public RegenWorldTask(String name) {
-        super(name);
-        this.config = Reset.instance.getRefreshConfig();
-        this.manager = Reset.instance.getWorldManager();
-        this.world = manager.world(name);
-
+    public RegenWorldTask(String name, RefreshConfig config, WorldManagerApi manager, MinecraftServer server) {
+        this.name = name;
+        this.config = config;
+        this.manager = manager;
+        this.server = server;
+        this.trigger = new CronTrigger(config.get(name).getTimePreset());//todo bug
     }
 
     @Override
-    public void runTask() {
-
-        if (world == null) {
+    public void execute(IJobContext context) {
+        List<String> worldNames = new ArrayList<>();
+        server.getAllLevels().forEach(world -> worldNames.add(world.dimension().location().toString()));
+        if (!worldNames.contains(name)) {
             Reset.instance.getLog().info("世界 " + name + " 不存在, 请检查配置文件");
         } else {
-            regenWorld();
+            ServerLevel world = server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(name)));
+            regenWorld(world);
         }
+    }
 
+    public ITrigger getTrigger() {
+        return trigger;
     }
 
     public List<String> getResetCommand() {
         return config.get(name).getCmds();
     }
 
-    public void regenWorld() {
-        boolean changeSeed = ((WorldRefresh)config.get(name)).isUseSeed();
+    public void regenWorld(ServerLevel world) {
+        boolean changeSeed = config.get(name).isUseSeed();
         long seed;
 
-        ChunkGenerator chunkGenerator = world.getChunkSource().getGenerator();
-        Difficulty difficulty = world.getDifficulty();
-        Random rand = new Random();
-
         if (changeSeed) {
-            seed = rand.nextLong();
+            seed = name.hashCode();
         } else {
             seed = world.getSeed();
         }
@@ -62,7 +72,7 @@ public class RegenWorldTask extends ScheduleTask{
         Logger.info("&a━━━━━━━━━━━━━━  &e正在自动刷新 " + name + " 世界  &a━━━━━━━━━━━━━━");
         Logger.info(" ");
 
-        boolean regenSuccess = manager.resetWorld(name, world.dimensionTypeId(), chunkGenerator, difficulty, seed);
+        boolean regenSuccess = manager.resetWorld(name, world.dimensionTypeId(), world.getChunkSource().getGenerator(), world.getDifficulty(), seed);
 
         if (regenSuccess) {
             runResetCommand();
@@ -78,7 +88,9 @@ public class RegenWorldTask extends ScheduleTask{
         if (getResetCommand() == null) return;
 
         for (String command : getResetCommand()) {
-            Reset.instance.getServer().getCommands().performPrefixedCommand(Reset.instance.getServer().createCommandSourceStack(), name);
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command);
         }
     }
+
+
 }
