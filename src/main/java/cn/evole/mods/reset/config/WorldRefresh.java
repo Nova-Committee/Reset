@@ -21,26 +21,24 @@ public class WorldRefresh implements ConfigurationSerializable {
 
     private String timePreset;
     private String timeNext;
-
-    private boolean useSeed;
-
     private List<String> cmds;
+    private boolean useSeed;
 
     public WorldRefresh(String timePreset, String timeNext, boolean useSeed, @Nullable List<String> cmds){
         this.timePreset = timePreset;
-        this.timeNext = timeNext;
-        this.useSeed = useSeed;
+        this.timeNext = Optional.ofNullable(timeNext).isPresent() ? timeNext : "";
         this.cmds = Optional.ofNullable(cmds).isPresent() ? cmds : new ArrayList<>();
+        this.useSeed = useSeed;
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> serialize = new HashMap<>();
 
-        serialize.put("时间设置", timePreset);
-        serialize.put("到期时间", timeNext);
+        serialize.put("时间设置", getTimePreset());
+        serialize.put("到期时间", getTimeNext());
+        serialize.put("任务执行", getCmds());
         serialize.put("更换种子", useSeed);
-        serialize.put("刷新指令", cmds);
 
         return serialize;
     }
@@ -50,7 +48,7 @@ public class WorldRefresh implements ConfigurationSerializable {
                 (map.get("时间设置") != null ? (String) map.get("时间设置") : "month:1, 20:00:00"),
                 (map.get("到期时间") != null ? (String) map.get("到期时间") : ""),
                 (map.get("更换种子") != null && (boolean) map.get("更换种子")),
-                (map.get("刷新指令") != null ? (List<String>) map.get("刷新指令") : List.of("gamerule keepInventory true"))
+                (map.get("任务执行") != null ? (List<String>) map.get("任务执行") : List.of("gamerule keepInventory true"))
         );
     }
 }

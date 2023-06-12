@@ -19,12 +19,12 @@ import xyz.nucleoid.fantasy.RuntimeWorldHandle;
  */
 
 public class WorldManagerApi {
-    private final MinecraftServer mc;
+    private final MinecraftServer server;
 
-    public WorldManagerApi(MinecraftServer mc){
-        this.mc = mc;
+    public WorldManagerApi(MinecraftServer server){
+        this.server = server;
     }
-    public ServerLevel create_world(String id, ResourceKey<DimensionType> dim, ChunkGenerator gen, Difficulty dif, long seed) {
+    public ServerLevel createWorld(String id, ResourceKey<DimensionType> dim, ChunkGenerator gen, Difficulty dif, long seed) {
         RuntimeWorldConfig config = new RuntimeWorldConfig()
                 .setDimensionType(dim)
                 .setGenerator(gen)
@@ -32,19 +32,34 @@ public class WorldManagerApi {
                 .setSeed(seed)
                 ;
 
-        Fantasy fantasy = Fantasy.get(this.mc);
+        Fantasy fantasy = Fantasy.get(this.server);
         RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), config);
         return worldHandle.asWorld();
     }
 
-    public void delete_world(String id) {
-        Fantasy fantasy = Fantasy.get(this.mc);
+    public void deleteWorld(String id) {
+        Fantasy fantasy = Fantasy.get(this.server);
         RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
         worldHandle.delete();
     }
+    public ServerLevel world(String id) {
+        Fantasy fantasy = Fantasy.get(this.server);
+        RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
+        return worldHandle.asWorld();
+    }
+    public long worldSeed(String id) {
+        Fantasy fantasy = Fantasy.get(this.server);
+        RuntimeWorldHandle worldHandle = fantasy.getOrOpenPersistentWorld(new ResourceLocation(id), null);
+        return worldHandle.asWorld().getSeed();
+    }
 
-    public ServerLevel recreate_world(String id, ResourceKey<DimensionType> dim, ChunkGenerator gen, Difficulty dif, long seed) {
-        delete_world(id);
-        return create_world(id, dim, gen, dif, seed);
+    public boolean resetWorld(String id, ResourceKey<DimensionType> dim, ChunkGenerator gen, Difficulty dif, long seed) {
+        try {
+            deleteWorld(id);
+            createWorld(id, dim, gen, dif, seed);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }

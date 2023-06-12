@@ -24,7 +24,9 @@ dependencies {
 
     modImplementation include('cn.evole.config:AtomConfig-Yaml:0.2.0')
     modImplementation include('xyz.nucleoid:fantasy:0.4.10+1.19.4')
+    modImplementation include('com.github.houbb:sandglass-core:1.7.2')
 
+    annotationProcessor("org.projectlombok:lombok:1.18.26")
 }
 
 processResources {
